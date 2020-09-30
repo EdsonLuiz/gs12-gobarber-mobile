@@ -1,13 +1,9 @@
-import React from "react";
+import React, { useRef } from "react";
 import Icon from "react-native-vector-icons/Feather";
-import {
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  View,
-  ScrollView,
-} from "react-native";
+import { Image, KeyboardAvoidingView, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Form } from "@unform/mobile";
+import { FormHandles } from "@unform/core";
 import {
   Container,
   Title,
@@ -21,6 +17,7 @@ import Button from "../../components/Button";
 
 function SignUp(): JSX.Element {
   const { goBack } = useNavigation();
+  const formRef = useRef<FormHandles>(null);
   return (
     <>
       <KeyboardAvoidingView style={{ flex: 1 }} behavior="height">
@@ -31,16 +28,24 @@ function SignUp(): JSX.Element {
           <Container>
             <Image source={logoImg} />
             <Title>Crie sua conta</Title>
-            <Input name="name" icon="user" placeholder="name" />
-            <Input name="email" icon="mail" placeholder="email" />
-            <Input name="password" icon="lock" placeholder="password" />
-            <Button
-              onPress={() => {
-                console.log("ok");
+            <Form
+              ref={formRef}
+              onSubmit={(data) => {
+                console.log(data);
               }}
+              style={{ width: "100%" }}
             >
-              Entrar
-            </Button>
+              <Input name="name" icon="user" placeholder="name" />
+              <Input name="email" icon="mail" placeholder="email" />
+              <Input name="password" icon="lock" placeholder="password" />
+              <Button
+                onPress={() => {
+                  formRef.current?.submitForm();
+                }}
+              >
+                Entrar
+              </Button>
+            </Form>
           </Container>
         </ScrollView>
 

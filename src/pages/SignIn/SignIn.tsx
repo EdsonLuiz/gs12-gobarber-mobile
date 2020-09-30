@@ -1,7 +1,9 @@
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import Icon from "react-native-vector-icons/Feather";
 import { Image, KeyboardAvoidingView, ScrollView } from "react-native";
 import { useNavigation } from "@react-navigation/native";
+import { Form } from "@unform/mobile";
+import { FormHandles } from "@unform/core";
 import {
   Container,
   Title,
@@ -17,6 +19,11 @@ import Button from "../../components/Button";
 
 function SignIn(): JSX.Element {
   const { navigate } = useNavigation();
+  const handleSignIn = useCallback((data: object) => {
+    console.log(data);
+  });
+
+  const formRef = useRef<FormHandles>(null);
   return (
     <>
       <KeyboardAvoidingView style={{ flex: 1 }}>
@@ -27,15 +34,21 @@ function SignIn(): JSX.Element {
           <Container>
             <Image source={logoImg} />
             <Title>Faça seu Logon </Title>
-            <Input name="email" icon="mail" placeholder="email" />
-            <Input name="password" icon="lock" placeholder="password" />
-            <Button
-              onPress={() => {
-                console.log("ok");
-              }}
+            <Form
+              ref={formRef}
+              onSubmit={handleSignIn}
+              style={{ width: "100%" }}
             >
-              Entrar
-            </Button>
+              <Input name="email" icon="mail" placeholder="email" />
+              <Input name="password" icon="lock" placeholder="password" />
+              <Button
+                onPress={() => {
+                  formRef.current?.submitForm();
+                }}
+              >
+                Entrar
+              </Button>
+            </Form>
             <ForgotPassword>
               <ForgotPasswordText>Esqueci minha senha</ForgotPasswordText>
             </ForgotPassword>
