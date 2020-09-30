@@ -1,6 +1,11 @@
 import React, { useCallback, useRef } from "react";
 import Icon from "react-native-vector-icons/Feather";
-import { Image, KeyboardAvoidingView, ScrollView } from "react-native";
+import {
+  Image,
+  KeyboardAvoidingView,
+  ScrollView,
+  TextInput,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Form } from "@unform/mobile";
 import { FormHandles } from "@unform/core";
@@ -24,6 +29,7 @@ function SignIn(): JSX.Element {
   });
 
   const formRef = useRef<FormHandles>(null);
+  const passwordinputRef = useRef<TextInput>(null);
   return (
     <>
       <KeyboardAvoidingView style={{ flex: 1 }}>
@@ -39,8 +45,27 @@ function SignIn(): JSX.Element {
               onSubmit={handleSignIn}
               style={{ width: "100%" }}
             >
-              <Input name="email" icon="mail" placeholder="email" />
-              <Input name="password" icon="lock" placeholder="password" />
+              <Input
+                autoCorrect={false}
+                autoCapitalize="none"
+                keyboardType="email-address"
+                name="email"
+                icon="mail"
+                placeholder="email"
+                returnKeyType="next"
+                onSubmitEditing={() => passwordinputRef.current?.focus()}
+              />
+              <Input
+                secureTextEntry
+                returnKeyType="send"
+                name="password"
+                icon="lock"
+                placeholder="password"
+                ref={passwordinputRef}
+                onSubmitEditing={() => {
+                  formRef.current?.submitForm();
+                }}
+              />
               <Button
                 onPress={() => {
                   formRef.current?.submitForm();
