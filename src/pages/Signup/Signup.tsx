@@ -1,10 +1,12 @@
-import React, { useRef } from "react";
+import React, { useCallback, useRef } from "react";
+import * as Yup from "yup";
 import Icon from "react-native-vector-icons/Feather";
 import {
   Image,
   KeyboardAvoidingView,
   ScrollView,
   TextInput,
+  Alert,
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { Form } from "@unform/mobile";
@@ -16,15 +18,55 @@ import {
   BackToSignInButtonText,
 } from "./styles";
 
+import getValidationErrors from "../../utils/getValidationErrors";
+
 import logoImg from "../../assets/logo.png";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+
+interface ISignUpFormData {
+  name: string;
+  email: string;
+  password: string;
+}
 
 function SignUp(): JSX.Element {
   const { goBack } = useNavigation();
   const formRef = useRef<FormHandles>(null);
   const emailInputRef = useRef<TextInput>(null);
   const passwordInputRef = useRef<TextInput>(null);
+
+  const handleSignUp = useCallback(async (data: ISignUpFormData) => {
+    try {
+      formRef.current?.setErrors({});
+      const schema = Yup.object().shape({
+        name: Yup.string().required("Nome obrigatório"),
+        email: Yup.string()
+          .required("E-mail obrigatório")
+          .email("Digite um e-mail válido"),
+        password: Yup.string().min(6, "Mínimo de seis digitos"),
+      });
+
+      await schema.validate(data, {
+        abortEarly: false,
+      });
+
+      /* await api.post("/users", data); */
+
+      /* history.push("/"); */
+    } catch (error) {
+      if (error instanceof Yup.ValidationError) {
+        const errors = getValidationErrors(error);
+        formRef.current?.setErrors(errors);
+        return;
+      }
+
+      Alert.alert(
+        "Erro no cadastro",
+        "Ocorreu um erro durante o cadastro, cheque os dados fornecidos"
+      );
+    }
+  }, []);
 
   return (
     <>
@@ -38,9 +80,7 @@ function SignUp(): JSX.Element {
             <Title>Crie sua conta</Title>
             <Form
               ref={formRef}
-              onSubmit={(data) => {
-                console.log(data);
-              }}
+              onSubmit={handleSignUp}
               style={{ width: "100%" }}
             >
               <Input
