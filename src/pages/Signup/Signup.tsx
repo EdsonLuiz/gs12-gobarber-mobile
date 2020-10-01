@@ -23,6 +23,7 @@ import getValidationErrors from "../../utils/getValidationErrors";
 import logoImg from "../../assets/logo.png";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
+import api from "../../services/api";
 
 interface ISignUpFormData {
   name: string;
@@ -51,9 +52,14 @@ function SignUp(): JSX.Element {
         abortEarly: false,
       });
 
-      /* await api.post("/users", data); */
+      await api.post("/users", data);
 
-      /* history.push("/"); */
+      Alert.alert(
+        "Cadastro realizado",
+        "Você já pode fazer login e utilizar nossos serviços"
+      );
+
+      goBack();
     } catch (error) {
       if (error instanceof Yup.ValidationError) {
         const errors = getValidationErrors(error);
