@@ -20,6 +20,8 @@ import {
   CreateAccountButtonText,
 } from "./styles";
 
+import { useAuth } from "../../context/AuthContext";
+
 import getValidationErrors from "../../utils/getValidationErrors";
 
 import logoImg from "../../assets/logo.png";
@@ -33,6 +35,10 @@ interface ISignInFormData {
 
 function SignIn(): JSX.Element {
   const { navigate } = useNavigation();
+
+  const { signIn, user } = useAuth();
+
+  console.log(user);
 
   const handleSignIn = useCallback(async (data: ISignInFormData) => {
     try {
@@ -48,10 +54,10 @@ function SignIn(): JSX.Element {
         abortEarly: false,
       });
 
-      /* await signIn({ */
-      /*   email: data.email, */
-      /*   password: data.password, */
-      /* }); */
+      await signIn({
+        email: data.email,
+        password: data.password,
+      });
 
       /* history.push('/dashboard'); */
     } catch (error) {
