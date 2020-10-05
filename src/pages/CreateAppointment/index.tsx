@@ -1,6 +1,39 @@
-import React from "react";
-import { View } from "react-native";
+import React, { useCallback } from "react";
+import Icon from "react-native-vector-icons/Feather";
+
+import { useRoute, useNavigation } from "@react-navigation/native";
+import {
+  Container,
+  Header,
+  BackButton,
+  HeaderTitle,
+  UserAvatar,
+} from "./styles";
+import { useAuth } from "../../context/AuthContext";
+
+interface RouteParams {
+  prodiverId: string;
+}
 
 export default function CreateAppointment() {
-  return <View />;
+  const { user } = useAuth();
+  const route = useRoute();
+  const { goBack } = useNavigation();
+  const { prodiverId } = route.params as RouteParams;
+  const navigateBack = useCallback(() => {
+    goBack();
+  }, [goBack]);
+
+  return (
+    <Container>
+      <Header>
+        <BackButton onPress={navigateBack}>
+          <Icon name="chevron-left" size={24} color="#999591" />
+        </BackButton>
+
+        <HeaderTitle>Cabeleireiros</HeaderTitle>
+        <UserAvatar source={{ uri: user.avatar_url }} />
+      </Header>
+    </Container>
+  );
 }
