@@ -141,7 +141,7 @@ export default function CreateAppointment() {
         date,
       });
 
-      navigate("AppointmentCreate", { date: date.getTime() });
+      navigate("AppointmentCreated", { date: date.getTime() });
     } catch (error) {
       console.log(error);
       Alert.alert(
