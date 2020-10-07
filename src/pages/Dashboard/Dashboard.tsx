@@ -28,14 +28,13 @@ export interface Provider {
 }
 
 export default function Dashboard() {
-  const { signOut, user } = useAuth();
+  const { user } = useAuth();
   const { navigate } = useNavigation();
 
   const [providers, setProviders] = useState<Provider[]>([]);
 
   const navigateToProfile = useCallback(() => {
-    /* navigate("Profile"); */
-    signOut();
+    navigate("Profile");
   }, []);
 
   const navigateToCreateAppointment = useCallback(
