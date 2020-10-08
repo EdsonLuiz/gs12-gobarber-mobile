@@ -25,14 +25,16 @@ import Button from "../../components/Button";
 import api from "../../services/api";
 import { useAuth } from "../../context/AuthContext";
 
-interface ISignUpFormData {
+interface IProfileFormData {
   name: string;
   email: string;
+  old_password: string;
   password: string;
+  password_confirmation: string;
 }
 
 function SignUp(): JSX.Element {
-  const { user } = useAuth();
+  const { user, updateUser } = useAuth();
   const { goBack } = useNavigation();
   const formRef = useRef<FormHandles>(null);
   const emailInputRef = useRef<TextInput>(null);
@@ -41,42 +43,80 @@ function SignUp(): JSX.Element {
   const oldPasswordInputRef = useRef<TextInput>(null);
   const confirmPasswordInputRef = useRef<TextInput>(null);
 
-  const handleSignUp = useCallback(async (data: ISignUpFormData) => {
-    try {
-      formRef.current?.setErrors({});
-      const schema = Yup.object().shape({
-        name: Yup.string().required("Nome obrigatório"),
-        email: Yup.string()
-          .required("E-mail obrigatório")
-          .email("Digite um e-mail válido"),
-        password: Yup.string().min(6, "Mínimo de seis digitos"),
-      });
+  const handleSignUp = useCallback(
+    async (data: IProfileFormData) => {
+      try {
+        formRef.current?.setErrors({});
 
-      await schema.validate(data, {
-        abortEarly: false,
-      });
+        const schema = Yup.object().shape({
+          name: Yup.string().required("Nome obrigatório"),
+          email: Yup.string()
+            .required("E-mail obrigatório")
+            .email("Digite um e-mail válido"),
+          old_password: Yup.string(),
+          password: Yup.string().when("old_password", {
+            is: (val) => !!val.lenght,
+            then: Yup.string().required("Campo obrigatório"),
+            otherwise: Yup.string(),
+          }),
+          password_confirmation: Yup.string()
+            .when("old_password", {
+              is: (val) => !!val.lenght,
+              then: Yup.string().required("Campo obrigatório"),
+              otherwise: Yup.string(),
+            })
+            .oneOf([Yup.ref("password")], "Confirmação incorreta"),
+        });
 
-      await api.post("/users", data);
+        const {
+          name,
+          email,
+          old_password,
+          password,
+          password_confirmation,
+        } = data;
 
-      Alert.alert(
-        "Cadastro realizado",
-        "Você já pode fazer login e utilizar nossos serviços"
-      );
+        await schema.validate(data, {
+          abortEarly: false,
+        });
 
-      goBack();
-    } catch (error) {
-      if (error instanceof Yup.ValidationError) {
-        const errors = getValidationErrors(error);
-        formRef.current?.setErrors(errors);
-        return;
+        const formData = {
+          name,
+          email,
+          ...(old_password
+            ? {
+                old_password,
+                password,
+                password_confirmation,
+              }
+            : {}),
+        };
+
+        const response = await api.put("/profile", formData);
+
+        updateUser(response.data);
+
+        Alert.alert(
+          "Perfil atualizado",
+          "Suas novas informações já estão sendo utilizadas"
+        );
+
+        goBack();
+      } catch (error) {
+        if (error instanceof Yup.ValidationError) {
+          const errors = getValidationErrors(error);
+          formRef.current?.setErrors(errors);
+          return;
+        }
+
+        Alert.alert(
+          "Erro na atualização do cadastro",
+          "Ocorreu um erro durante aatualização do cadastro, cheque os dados fornecidos"
+        );
       }
-
-      Alert.alert(
-        "Erro no cadastro",
-        "Ocorreu um erro durante o cadastro, cheque os dados fornecidos"
-      );
-    }
-  }, []);
+    },
+    [goBack, updateUser]
+  );
 
   const handleGoBack = useCallback(() => {
     goBack();
@@ -95,6 +135,7 @@ function SignUp(): JSX.Element {
             </UserAvatarButton>
             <Title>Meu perfil</Title>
             <Form
+              initialData={user}
               ref={formRef}
               onSubmit={handleSignUp}
               style={{ width: "100%" }}
